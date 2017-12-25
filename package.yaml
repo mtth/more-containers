@@ -1,0 +1,38 @@
+name:                more-containers
+version:             0.1.0.0
+github:              "mtth/more-containers"
+license:             MIT
+author:              "Matthieu Monsch"
+maintainer:          "matthieu.monsch@gmail.com"
+copyright:           "2017 Matthieu Monsch"
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+synopsis:            A few more collections
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on Github at https://github.com/mtth/more-containers
+
+dependencies:
+- base >= 4.7 && < 5
+- containers >= 0.5 && < 0.6
+
+library:
+  source-dirs: src
+
+tests:
+  more-containers-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - more-containers
+    - hspec >= 2.4 && < 2.5
