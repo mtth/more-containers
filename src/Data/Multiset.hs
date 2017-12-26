@@ -11,6 +11,9 @@ module Data.Multiset ( Multiset
                     -- * Construction
                      , empty, singleton, fromMap, fromMap'
                      , fromList, fromCountsList, fromCountsList'
+                    -- * Accessors
+                     , member, notMember
+                     , (!), count
                     -- * Update
                      , incr, incr', insert, remove, remove'
                      , filter
@@ -75,7 +78,7 @@ empty = Multiset Map.empty
 singleton :: (Ord v) => v -> Multiset v
 singleton v = Multiset $ Map.singleton v 1
 
--- | /O(m * log n)/ Build a multiset from a map.
+-- | /O(m * log m)/ Build a multiset from a map.
 --
 -- Negative counts are ignored; see 'fromMap'' for a stricter version.
 fromMap :: (Integral a, Ord v) => Map v a -> Multiset v
@@ -116,7 +119,7 @@ member v = Map.member v . toMap
 notMember :: (Ord v) => v -> Multiset v -> Bool
 notMember v = Map.notMember v . toMap
 
--- /O(1)/ The number of times the element is present in the multiset.
+-- | /O(1)/ The number of times the element is present in the multiset.
 --
 -- 0 if absent.
 count :: (Ord v) => v -> Multiset v -> Int
@@ -213,7 +216,7 @@ toDescCountsList = sortOn (negate . snd) . toCountsList
 
 -- Other
 
--- | /O(n)/ The 'Set' of all elements in the multiset.
+-- | /O(m)/ The 'Set' of all elements in the multiset.
 elems :: Multiset v -> Set v
 elems = Map.keysSet . toMap
 

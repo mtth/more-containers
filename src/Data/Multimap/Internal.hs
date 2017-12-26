@@ -6,6 +6,7 @@ module Data.Multimap.Internal ( Multimap(..)
                               , null, size
                               , empty, singleton, fromMap
                               , fromList, fromCollectionsList
+                              , member, notMember
                               , (!)
                               , insert, insertAll, deleteAll
                               , filter, filterWithKey
@@ -15,9 +16,10 @@ module Data.Multimap.Internal ( Multimap(..)
                               , lift1, liftF1
                               ) where
 
-import Data.Multiset (Multiset)
 import Data.Multimap.Collection (Collection)
 import qualified Data.Multimap.Collection as Col
+import Data.Multiset (Multiset)
+import qualified Data.Multiset as Mset
 
 import Prelude hiding (filter, foldr, null)
 import qualified Prelude as Prelude
@@ -75,6 +77,9 @@ fromCollectionsList = fromMap . Map.fromList
 member :: (Collection c, Ord k) => k -> Multimap k c v -> Bool
 member k = Map.member k . toMap
 
+notMember :: (Collection c, Ord k) => k -> Multimap k c v -> Bool
+notMember k = Map.notMember k . toMap
+
 count :: (Collection c, Ord k) => k -> Multimap k c v -> Int
 count k = Col.size . (! k)
 
@@ -103,11 +108,14 @@ toList :: (Collection c) => Multimap k c v -> [(k,v)]
 toList (Multimap m) = concat $ fmap go (Map.toList m) where
   go (k,cs) = foldr (\c a -> (k,c) : a) [] cs
 
+keys :: Multimap k c v -> [k]
+keys = Map.keys . toMap
+
 keysSet :: Multimap k c v -> Set k
 keysSet = Map.keysSet . toMap
 
-keysMultiset :: Multimap k c v -> Multiset k
-keysMultiset = undefined
+keysMultiset :: (Ord k, Collection c) => Multimap k c v -> Multiset k
+keysMultiset = Mset.fromCountsList . Map.toList . Map.map Col.size . toMap
 
 -- | Lift an operation over a collection of values into a multimap operation.
 --
