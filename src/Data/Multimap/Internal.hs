@@ -12,7 +12,7 @@ module Data.Multimap.Internal ( Multimap(..)
                               , filter, filterWithKey
                               , union
                               , toMapWith, toList
-                              , keysSet
+                              , keys, keysSet, keysMultiset
                               , lift1, liftF1
                               ) where
 
@@ -122,8 +122,8 @@ keysMultiset = Mset.fromCountsList . Map.toList . Map.map Col.size . toMap
 -- Sample use to filter even values from a 'SetMultimap':
 --
 -- @
---    let ms = fromList [('a', 1), ('a', 2)] :: SetMultimap Char Int
---    lift1 (Set.filter even) 'a' ms == fromList [('a', 1)]
+--    let ms = fromList [(\'a\', 1), (\'a\', 2)] :: SetMultimap Char Int
+--    lift1 (Set.filter even) \'a\' ms == fromList [(\'a\', 1)]
 -- @
 lift1 :: (Ord k, Collection c) => (c v -> c v)
                                -> k

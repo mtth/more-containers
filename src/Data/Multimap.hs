@@ -7,6 +7,7 @@ module Data.Multimap ( Multimap, Collection
                      , empty, singleton, fromMap
                      , fromList, fromCollectionsList
                      -- * Access
+                     , member, notMember
                      , (!)
                      , insert, insertAll, deleteAll
                      -- * Modification
@@ -15,7 +16,7 @@ module Data.Multimap ( Multimap, Collection
                      -- * Extraction
                      , toMap, toMapWith, toList
                      -- * Other
-                     , keysSet
+                     , keys, keysSet, keysMultiset
                      , lift1
                      ) where
 
