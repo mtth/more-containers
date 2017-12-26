@@ -10,11 +10,16 @@ import qualified Data.Set as Set
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
 
-
+-- | Lower bound for multimap values.
+--
+-- An alternative could have been to use 'Applicative' but that would have
+-- precluded common implementations (e.g. 'Set').
 class Foldable c => Collection c where
 
+  -- | The empty collection.
   empty :: c v
 
+  -- | A singleton collection.
   singleton :: v -> c v
 
   null :: c v -> Bool

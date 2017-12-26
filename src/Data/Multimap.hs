@@ -4,7 +4,8 @@ module Data.Multimap ( Multimap, Collection
                      -- * Tests
                      , null, size
                      -- * Construction
-                     , empty, singleton, fromMap, fromList
+                     , empty, singleton, fromMap
+                     , fromList, fromCollectionsList
                      -- * Access
                      , (!)
                      , insert, insertAll, deleteAll

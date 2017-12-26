@@ -2,12 +2,13 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9b445c0f89b6d9c4a6a04c21aae1e5464406dfb839d65221e6231641d197644b
+-- hash: afe0a4ff03c43fa2993ccdc2c1e30160467ac66a3520ad7fafab40762e0cdfab
 
 name:           more-containers
-version:        0.1.0.0
+version:        0.1.0.2
 synopsis:       A few more collections
 description:    Please see the README on Github at https://github.com/mtth/more-containers
+category:       Data Structures
 homepage:       https://github.com/mtth/more-containers#readme
 bug-reports:    https://github.com/mtth/more-containers/issues
 author:         Matthieu Monsch
@@ -29,12 +30,13 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      base >=4.9 && <5
     , containers >=0.5 && <0.6
   exposed-modules:
       Data.Multimap
       Data.Multimap.Collection
       Data.Multimap.Internal
+      Data.Multimap.ListMultimap
       Data.Multimap.SeqMultimap
       Data.Multimap.SetMultimap
       Data.Multiset
@@ -49,7 +51,7 @@ test-suite more-containers-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      base >=4.9 && <5
     , containers >=0.5 && <0.6
     , hspec >=2.4 && <2.5
     , more-containers
