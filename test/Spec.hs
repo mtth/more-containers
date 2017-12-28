@@ -2,6 +2,8 @@ import Data.Multimap (Multimap)
 import qualified Data.Multimap as Mmap
 import Data.Multimap.ListMultimap (ListMultimap)
 import qualified Data.Multimap.ListMultimap as Mmap
+import Data.Multimap.SetMultimap (SetMultimap)
+import qualified Data.Multimap.SetMultimap as Mmap
 import Data.Multiset (Multiset)
 import qualified Data.Multiset as Mset
 import Test.Hspec
@@ -28,3 +30,8 @@ main = hspec $ do
       Mmap.uncons 'a' mm `shouldBe` Just (2, Mmap.empty)
       Mmap.uncons 'a' mm' `shouldBe` Just (1, mm)
       Mmap.uncons 'b' mm `shouldBe` Nothing
+  describe "SetMultimap" $ do
+    let mm = Mmap.fromList [('a', 2)]
+        mm' = Mmap.fromList [('a', 1), ('a',2)]
+    it "delete" $ do
+      Mmap.delete 'a' 1 mm' `shouldBe` mm

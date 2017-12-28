@@ -17,7 +17,7 @@ module Data.Multimap ( Multimap, Collection
                      , toMap, toMapWith, toList
                      -- * Other
                      , keys, keysSet, keysMultiset
-                     , lift1
+                     , lift1, liftF1
                      ) where
 
 import Prelude ()

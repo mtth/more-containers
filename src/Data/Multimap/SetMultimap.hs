@@ -10,6 +10,7 @@ import qualified Data.Set as Set
 -- | A multimap with 'Set' values.
 type SetMultimap k v = Multimap k Set v
 
+-- | Map over the multimap's values; useful since 'Set' is not a functor.
 map :: (Ord k, Ord v1 , Ord v2) => (v1 -> v2) -> SetMultimap k v1 -> SetMultimap k v2
 map f (Multimap m) = Multimap $ fmap (Set.map f) m
 

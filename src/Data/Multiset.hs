@@ -129,7 +129,6 @@ count v = Map.findWithDefault 0 v . toMap
 (!) :: (Ord v) => Multiset v -> v -> Int
 (!) = flip count
 
-
 -- | /O(log m)/ Increment the count of element.
 --
 -- The increment can be negative (removing elements). Resulting negative counts
