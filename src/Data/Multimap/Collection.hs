@@ -5,6 +5,8 @@ module Data.Multimap.Collection ( Collection
 import Prelude hiding (foldr, null)
 import qualified Prelude as Prelude
 import Data.Foldable (foldl', foldr)
+import Data.Multiset (Multiset)
+import qualified Data.Multiset as Multiset
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Sequence (Seq)
@@ -45,3 +47,9 @@ instance Collection Seq where
   singleton = Seq.singleton
   null = Seq.null
   size = Seq.length
+
+instance Collection Multiset where
+  empty = Multiset.empty
+  singleton = Multiset.singleton
+  null = Multiset.null
+  size = Multiset.size

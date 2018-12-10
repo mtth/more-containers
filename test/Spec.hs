@@ -21,6 +21,9 @@ main = hspec $ do
     it "Incr" $ do
       let m = Mset.fromList ['a']
       Mset.insert 'a' m `shouldBe` Mset.mapCounts (*2) m
+    it "Most common" $ do
+      let m = Mset.fromList ['a', 'b', 'b', 'b', 'c', 'd']
+      Mset.mostCommon m `shouldBe` ['b']
   describe "ListMultimap" $ do
     let mm = Mmap.fromCollectionsList [('a', [2])]
         mm' = Mmap.fromCollectionsList [('a', [1,2])]

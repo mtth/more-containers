@@ -1,5 +1,5 @@
 name:                more-containers
-version:             0.1.0.5
+version:             0.1.1.0
 github:              "mtth/more-containers"
 license:             MIT
 author:              "Matthieu Monsch"
@@ -35,4 +35,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - more-containers
-    - hspec >= 2.4 && < 2.5
+    - hspec >= 2.5 && < 2.6

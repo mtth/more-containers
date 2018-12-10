@@ -16,13 +16,13 @@ module Data.Multiset ( Multiset
                      , (!), count
                     -- * Update
                      , incr, incr', insert, remove, remove'
-                     , filter
+                     , filter, filterCounts
                      , map, mapCounts
                     -- * Combination
                      , max, min, sum, unionWith, difference, intersectionWith
                      , toList, toCountsList, toAscCountsList, toDescCountsList
                      -- * Other
-                     , elems
+                     , elems, mostCommon
                      ) where
 
 import Prelude hiding (filter, foldr, map, max, min, null, sum)
@@ -39,7 +39,7 @@ import qualified Data.Set as Set
 import Data.Traversable (traverse)
 
 -- | A multiset
-newtype Multiset v = Multiset { toMap :: Map v Int
+newtype Multiset v = Multiset { getMultiset :: Map v Int
                               } deriving (Eq, Ord, Read, Show)
 
 instance (Ord v) => Semigroup (Multiset v) where
@@ -55,18 +55,18 @@ instance Foldable Multiset where
 
 -- | /O(1)/ Whether a multiset is empty.
 null :: Multiset v -> Bool
-null = Map.null . toMap
+null = Map.null . getMultiset
 
 -- | The total number of elements in the multiset.
 --
 -- /O(m)/ Note that this isn't the number of /distinct/ elements,
 -- 'distinctSize' provides it.
 size :: Multiset v -> Int
-size = Map.foldl (\a c -> a + c) 0 . toMap
+size = Map.foldl' (\a c -> a + c) 0 . getMultiset
 
 -- | /O(1)/ The number of distinct elements in the multiset.
 distinctSize :: Multiset v -> Int
-distinctSize = Map.size . toMap
+distinctSize = Map.size . getMultiset
 
 -- Construction
 
@@ -75,7 +75,7 @@ empty :: Multiset v
 empty = Multiset Map.empty
 
 -- | /O(1)/ A multiset with a single element.
-singleton :: (Ord v) => v -> Multiset v
+singleton :: v -> Multiset v
 singleton v = Multiset $ Map.singleton v 1
 
 -- | /O(m * log m)/ Build a multiset from a map.
@@ -113,17 +113,17 @@ fromCountsList' = fromMap' . Map.fromListWith (+)
 
 -- | /O(log m)/ Whether the element is present at least once.
 member :: (Ord v) => v -> Multiset v -> Bool
-member v = Map.member v . toMap
+member v = Map.member v . getMultiset
 
 -- | /O(log m)/ Whether the element is not present.
 notMember :: (Ord v) => v -> Multiset v -> Bool
-notMember v = Map.notMember v . toMap
+notMember v = Map.notMember v . getMultiset
 
 -- | /O(1)/ The number of times the element is present in the multiset.
 --
 -- 0 if absent.
 count :: (Ord v) => v -> Multiset v -> Int
-count v = Map.findWithDefault 0 v . toMap
+count v = Map.findWithDefault 0 v . getMultiset
 
 -- | /O(1)/ Infix version of 'count'.
 (!) :: (Ord v) => Multiset v -> v -> Int
@@ -138,9 +138,9 @@ incr n v (Multiset m) = Multiset $ Map.alter (wrap . (+n) . unwrap) v m where
   unwrap = fromMaybe 0
   wrap n = if n <= 0 then Nothing else Just n
 
--- | /O(log m)/ Increment the count of element.
---
--- Resulting negative counts are considered 0.
+-- | /O(log m)/ Increment the count of element, enforcing that any returned
+-- multiset has non-negative counts. If a resulting count would have become
+-- negative, this function returns 'Nothing'
 incr' :: (Ord v) => Int -> v -> Multiset v -> Maybe (Multiset v)
 incr' n v mm@(Multiset m) = Multiset <$> do
   let n' = (count v mm) + n
@@ -163,6 +163,10 @@ remove' = incr' (-1)
 -- | Standard value filter.
 filter :: (Ord v) => (v -> Bool) -> Multiset v -> Multiset v
 filter f (Multiset m) = Multiset $ Map.filterWithKey (\v _ -> f v) m
+
+-- | Filter on counts.
+filterCounts :: (Ord v) => (Int -> Bool) -> Multiset v -> Multiset v
+filterCounts f (Multiset m) = Multiset $ Map.filter f m
 
 -- | Map on the multiset's values.
 map :: (Ord v1, Ord v2) => (v1 -> v2) -> Multiset v1 -> Multiset v2
@@ -200,16 +204,27 @@ difference :: (Ord v) => Multiset v -> Multiset v -> Multiset v
 difference (Multiset m1) (Multiset m2) = Multiset $ Map.differenceWith go m1 m2 where
   go n1 n2 = let n = n1 - n2 in if n > 0 then Just n else Nothing
 
+-- | /O(1)/ Convert the multiset to a map of counts.
+toMap :: Multiset v -> Map v Int
+toMap (Multiset m) = m
+
 -- | Convert the multiset to a list; elements will be repeated according to their count.
 toList :: Multiset v -> [v]
-toList = concat . fmap (uncurry (flip replicate)) . Map.toList . toMap
+toList = concat . fmap (uncurry (flip replicate)) . Map.toList . getMultiset
 
+-- | Convert the multiset to a list of values and associated counts. The
+-- entries are in undefined order; see 'toAscCountsList' and 'toDescCountsList'
+-- for sorted versions.
 toCountsList :: Multiset v -> [(v,Int)]
-toCountsList = Map.toList . toMap
+toCountsList = Map.toList . getMultiset
 
+-- | Convert the multiset into a list of values and counts, from least common
+-- to most.
 toAscCountsList :: Multiset v -> [(v,Int)]
 toAscCountsList = sortOn snd . toCountsList
 
+-- | Convert the multiset into a list of values and counts, from most common
+-- to least.
 toDescCountsList :: Multiset v -> [(v,Int)]
 toDescCountsList = sortOn (negate . snd) . toCountsList
 
@@ -217,7 +232,13 @@ toDescCountsList = sortOn (negate . snd) . toCountsList
 
 -- | /O(m)/ The 'Set' of all elements in the multiset.
 elems :: Multiset v -> Set v
-elems = Map.keysSet . toMap
+elems = Map.keysSet . getMultiset
+
+-- | /O(m)/ The list of all elements with the highest count.
+mostCommon :: Multiset v -> [v]
+mostCommon ms = case toDescCountsList ms of
+  [] -> []
+  ((v, c) : ts) -> v : (fmap fst . takeWhile ((== c) . snd) $ ts)
 
 -- Internal
 

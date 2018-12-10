@@ -11,7 +11,7 @@ module Data.Multimap.Internal ( Multimap(..)
                               , insert, insertAll, deleteAll
                               , filter, filterWithKey
                               , union
-                              , toMapWith, toList
+                              , toMap, toMapWith, toList
                               , keys, keysSet, keysMultiset
                               , lift1, liftF1
                               ) where
@@ -30,7 +30,7 @@ import Data.Maybe (fromMaybe)
 import Data.Semigroup (Semigroup, (<>))
 import Data.Set (Set)
 
-newtype Multimap k c v = Multimap { toMap :: Map k (c v)
+newtype Multimap k c v = Multimap { getMultimap :: Map k (c v)
                                   } deriving (Eq, Functor, Ord, Read, Show)
 
 instance (Ord k, Semigroup (c v)) => Semigroup (Multimap k c v) where
@@ -40,13 +40,17 @@ instance (Ord k, Semigroup (c v)) => Monoid (Multimap k c v) where
   mempty = empty
   mappend = union
 
--- TODO: Foldable, Traversable.
+-- TODO: Traversable.
+
+instance (Collection c) => Foldable (Multimap k c) where
+  foldMap f (Multimap m) = Map.foldMapWithKey go m where
+    go _ v = foldMap f v
 
 null :: Multimap k c v -> Bool
-null = Map.null . toMap
+null = Map.null . getMultimap
 
 size :: (Collection c) => Multimap k c v -> Int
-size = Map.foldl (\a c -> a + Col.size c) 0 . toMap
+size = Map.foldl (\a c -> a + Col.size c) 0 . getMultimap
 
 empty :: Multimap k c v
 empty = Multimap Map.empty
@@ -75,10 +79,10 @@ fromCollectionsList = fromMap . Map.fromList
 (Multimap m) ! k = Map.findWithDefault Col.empty k m
 
 member :: (Collection c, Ord k) => k -> Multimap k c v -> Bool
-member k = Map.member k . toMap
+member k = Map.member k . getMultimap
 
 notMember :: (Collection c, Ord k) => k -> Multimap k c v -> Bool
-notMember k = Map.notMember k . toMap
+notMember k = Map.notMember k . getMultimap
 
 count :: (Collection c, Ord k) => k -> Multimap k c v -> Int
 count k = Col.size . (! k)
@@ -101,21 +105,24 @@ filterWithKey f = fromList . Prelude.filter (uncurry f) . toList
 union :: (Ord k, Semigroup (c v)) => Multimap k c v -> Multimap k c v -> Multimap k c v
 union (Multimap m1) (Multimap m2) = Multimap $ Map.unionWith (<>) m1 m2
 
+toMap :: Multimap k c v -> Map k (c v)
+toMap = getMultimap
+
 toMapWith :: (c v -> a) -> Multimap k c v -> Map k a
-toMapWith f = fmap f . toMap
+toMapWith f = fmap f . getMultimap
 
 toList :: (Collection c) => Multimap k c v -> [(k,v)]
 toList (Multimap m) = concat $ fmap go (Map.toList m) where
   go (k,cs) = foldr (\c a -> (k,c) : a) [] cs
 
 keys :: Multimap k c v -> [k]
-keys = Map.keys . toMap
+keys = Map.keys . getMultimap
 
 keysSet :: Multimap k c v -> Set k
-keysSet = Map.keysSet . toMap
+keysSet = Map.keysSet . getMultimap
 
 keysMultiset :: (Ord k, Collection c) => Multimap k c v -> Multiset k
-keysMultiset = Mset.fromCountsList . Map.toList . Map.map Col.size . toMap
+keysMultiset = Mset.fromCountsList . Map.toList . Map.map Col.size . getMultimap
 
 -- | Lift an operation over a collection of values into a multimap operation.
 --
