@@ -19,21 +19,20 @@ import Test.Hspec (Spec, describe, it, shouldBe)
 
 listMultimapSpec :: Spec
 listMultimapSpec = describe "ListMultimap" $ do
-  let mm = fromMap $ Map.fromList [('a', [2])]
-      mm' = fromMap $ Map.fromList [('a', [1,2])]
-  it "cons" $ do
-    cons 'a' 1 mm `shouldBe` mm'
-  it "uncons" $ do
-    uncons 'a' mm `shouldBe` Just (2, empty)
-    uncons 'a' mm' `shouldBe` Just (1, mm)
-    uncons 'b' mm `shouldBe` Nothing
-  it "traverses" $ do
+  it "should cons" $ do
+    let m = fromGroupList [(1, "abc"), (2, "")]
+    cons 3 'a' m `shouldBe` fromGroupList [(1, "abc"), (3, "a")]
+  it "should uncons" $ do
+    let m = fromGroupList [(1, "aa")]
+    uncons 1 m `shouldBe` Just ('a', singleton 1 'a')
+    uncons 2 m `shouldBe` Nothing
+  it "can be traversed" $ do
     let
-      mm1 = [('a', Just 1), ('a', Just 2)] :: ListMultimap Char (Maybe Int)
-      mm2 = [('b', Nothing)] :: ListMultimap Char (Maybe Int)
-      mm3 = fromMap $ Map.singleton 'a' [1, 2]
-    sequenceA mm1 `shouldBe` Just mm3
-    sequenceA (mm1 <> mm2) `shouldBe` Nothing
+      m1 = [('a', Just 1), ('a', Just 2)] :: ListMultimap Char (Maybe Int)
+      m2 = [('b', Nothing)] :: ListMultimap Char (Maybe Int)
+      m3 = fromMap $ Map.singleton 'a' [1, 2]
+    sequenceA m1 `shouldBe` Just m3
+    sequenceA (m1 <> m2) `shouldBe` Nothing
   it "converts to set multimap" $ do
     let
       m1 = fromList [('a', 1), ('a', 1)] :: ListMultimap Char Int
@@ -41,7 +40,13 @@ listMultimapSpec = describe "ListMultimap" $ do
     m2 `shouldBe` fromList [('a', 1)]
 
 seqMultimapSpec :: Spec
-seqMultimapSpec = describe "SeqMultimap" $ pure () -- TODO
+seqMultimapSpec = describe "SeqMultimap" $ do
+  it "should pop" $ do
+    let m = fromList [(1, 'a'), (1, 'b'), (2, 'c')] :: SeqMultimap Int Char
+    popFirst 1 m `shouldBe` Just ('a', fromList [(1, 'b'), (2, 'c')])
+    popLast 1 m `shouldBe` Just ('b', fromList [(1, 'a'), (2, 'c')])
+    popFirst 2 m `shouldBe` Just ('c', fromList [(1, 'a'), (1, 'b')])
+    popLast 3 m `shouldBe` Nothing
 
 setMultimapSpec :: Spec
 setMultimapSpec = describe "SetMultimap" $ pure () -- TODO

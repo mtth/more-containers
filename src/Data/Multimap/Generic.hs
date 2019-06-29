@@ -96,8 +96,8 @@ singleton :: Collection c => k -> v -> Multimap c k v
 singleton k v = Multimap $ Map.singleton k (Col.singleton v)
 
 -- | /O(m)/ Builds a multimap from already grouped collections.
-fromGroupList :: (Monoid (c v), Ord k) => [Group k (c v)] -> Multimap c k v
-fromGroupList = Multimap . Map.fromListWith (<>)
+fromGroupList :: (Collection c, Monoid (c v), Ord k) => [Group k (c v)] -> Multimap c k v
+fromGroupList = fromMap . Map.fromListWith (<>)
 
 -- | /O(n * log n)/ Transforms a list of entries into a multimap, combining the values for each key
 -- into the chosen collection. The values are in the same order as in the original list.
@@ -106,8 +106,8 @@ fromListWith f ts = Multimap $ Map.map (f . reverse) $ m where
   Multimap m = foldl' (\r (k, v) -> modifyMany (v:) k r) empty ts
 
 -- | /O(1)/ Transforms a map of collections into a multimap.
-fromMap :: Map k (c v) -> Multimap c k v
-fromMap = Multimap
+fromMap :: Collection c => Map k (c v) -> Multimap c k v
+fromMap = Multimap . Map.filter (not . Col.null)
 
 -- | /O(log m)/ Returns the collection of values associated with a key.
 find :: (Monoid (c v), Ord k) => k -> Multimap c k v -> c v
@@ -191,7 +191,9 @@ filter :: (Collection c, Monoid (c v), Ord k) => (v -> Bool) -> Multimap c k v -
 filter f = fromGroupList . fmap (fmap (Col.filter f)) . toGroupList
 
 -- | /O(m)/ Filters multimap groups. This enables filtering by key and collection.
-filterGroups :: (Monoid (c v), Ord k) => (Group k (c v) -> Bool) -> Multimap c k v -> Multimap c k v
+filterGroups
+  :: (Collection c, Monoid (c v), Ord k)
+  => (Group k (c v) -> Bool) -> Multimap c k v -> Multimap c k v
 filterGroups f = fromGroupList . Prelude.filter f . toGroupList
 
 -- | Maps over the multimap's groups. This method can be used to convert between specific multimaps,
@@ -200,7 +202,7 @@ filterGroups f = fromGroupList . Prelude.filter f . toGroupList
 -- > let m1 = fromList [('a', 1), ('a', 1)] :: ListMultimap Char Int
 -- > let m2 = mapGroups (fmap Set.fromList) m1 :: SetMultimap Char Int
 mapGroups
-  :: (Monoid (c2 v2), Ord k2)
+  :: (Collection c2, Monoid (c2 v2), Ord k2)
   => (Group k1 (c1 v1) -> Group k2 (c2 v2)) -> Multimap c1 k1 v1 -> Multimap c2 k2 v2
 mapGroups f = fromGroupList . fmap f . toGroupList
 
