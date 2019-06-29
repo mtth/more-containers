@@ -6,16 +6,17 @@ module Spec.Multimap (
   setMultimapSpec
 ) where
 
-import Data.Multimap
-import Data.Multimap.List
-import Data.Multimap.Seq
-import Data.Multimap.Set
-
+import Data.Char (toUpper)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Test.Hspec (Spec, describe, it, shouldBe)
+
+import Data.Multimap
+import Data.Multimap.List
+import Data.Multimap.Seq
+import qualified Data.Multimap.Set as SetMmap
 
 listMultimapSpec :: Spec
 listMultimapSpec = describe "ListMultimap" $ do
@@ -49,4 +50,19 @@ seqMultimapSpec = describe "SeqMultimap" $ do
     popLast 3 m `shouldBe` Nothing
 
 setMultimapSpec :: Spec
-setMultimapSpec = describe "SetMultimap" $ pure () -- TODO
+setMultimapSpec = describe "SetMultimap" $ do
+  it "should map" $ do
+    let m = fromList [(1, 'a'), (1, 'A')] :: SetMultimap Int Char
+    size m `shouldBe` 2
+    SetMmap.map toUpper m `shouldBe` singleton 1 'A'
+  it "should delete" $ do
+    let m = singleton 2 'a'
+    SetMmap.delete 1 'a' empty `shouldBe` empty
+    SetMmap.delete 2 'a' m `shouldBe` empty
+    SetMmap.delete 2 'b' m `shouldBe` m
+    SetMmap.delete 1 'a' m `shouldBe` m
+  it "should check membership" $ do
+    let m = fromList [(1, 'a'), (2, 'b')] :: SetMultimap Int Char
+    SetMmap.member' 1 'a' m `shouldBe` True
+    SetMmap.member' 1 'b' m `shouldBe` False
+    SetMmap.notMember' 1 'b' m `shouldBe` True
