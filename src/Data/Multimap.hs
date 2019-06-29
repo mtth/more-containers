@@ -15,15 +15,15 @@ module Data.Multimap (
   ListMultimap,
   SeqMultimap,
   SetMultimap,
-  -- * Tests
-  null, size,
   -- * Construction
   empty, singleton,
 #if __GLASGOW_HASKELL__ >= 708
   fromList,
 #endif
   fromListWith, fromGroupList, fromMap,
-  -- * Access
+  -- * Tests and accessors
+  null,
+  size, distinctSize,
   member, notMember,
   find, (!),
   -- * Modification
@@ -37,11 +37,11 @@ module Data.Multimap (
   -- * Conversion
   toList, toGroupList, toMap,
   -- * Other
+  keys, keysSet, keysMultiset,
 #if __GLASGOW_HASKELL__ >= 708
   inverse,
 #endif
-  inverseWith,
-  keys, keysSet, keysMultiset
+  inverseWith
 ) where
 
 import Prelude ()

@@ -20,10 +20,10 @@ module Data.Multiset (
   null,
   size, distinctSize,
   member, notMember,
-  count, (!),
   isSubsetOf, isProperSubsetOf,
+  count, (!),
   -- * Update
-  modify, insert, remove, removeAll,
+  insert, remove, removeAll, modify,
   -- * Maps and filters
   map, mapGroups,
   filter, filterGroups,

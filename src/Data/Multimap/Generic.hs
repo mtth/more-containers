@@ -5,7 +5,7 @@
 -- | This internal module implements functionality shared by all multimaps.
 module Data.Multimap.Generic (
   Multimap(..), Group,
-  null, size,
+  null, size, distinctSize,
   empty, singleton,
 #if __GLASGOW_HASKELL__ >= 708
   fromList, inverse,
@@ -86,6 +86,10 @@ null = Map.null . _toMap
 -- | /O(m * C)/ Returns the size of the multimap.
 size :: Collection c => Multimap c k v -> Int
 size (Multimap m) = Map.foldl' (\n c -> n + Col.size c) 0 m
+
+-- | /O(1)/ Returns the number of distinct keys in the multimap.
+distinctSize :: Multimap c k v -> Int
+distinctSize = Map.size . _toMap
 
 -- | /O(1)/ Creates an empty multimap.
 empty :: Multimap c k v

@@ -54,6 +54,7 @@ setMultimapSpec = describe "SetMultimap" $ do
   it "should map" $ do
     let m = fromList [(1, 'a'), (1, 'A')] :: SetMultimap Int Char
     size m `shouldBe` 2
+    distinctSize m `shouldBe` 1
     SetMmap.map toUpper m `shouldBe` singleton 1 'A'
   it "should delete" $ do
     let m = singleton 2 'a'
