@@ -4,9 +4,9 @@
 
 ```haskell
 > m1 = fromList [1, 2, 1] :: Multiset Int
-> count 1 m -- 2
+> count 1 m1 -- 2
 > m2 = replicate 3 1 -- fromList [1, 1, 1]
-> insert 1 m == m2 <> singleton 2 -- True
+> insert 1 m1 == m2 <> singleton 2 -- True
 ```
 
 ## Multimaps
