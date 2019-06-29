@@ -50,8 +50,8 @@ import qualified Data.Set as Set
 import qualified GHC.Exts
 
 -- | A strict implementation of a multiset. It is backed by a 'Data.Map.Strict.Map' and inherits
--- several of its operation's complexities. In particular, the number of elements in a multiset must
--- not exceed @maxBound :: Int@.
+-- several of its properties and operation's complexities. In particular, the number of elements in
+-- a multiset must not exceed @maxBound :: Int@.
 data Multiset v = Multiset
   { _toMap :: !(Map v Int)
   , _size :: !Int
