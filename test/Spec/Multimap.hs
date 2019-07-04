@@ -6,6 +6,7 @@ module Spec.Multimap (
   setMultimapSpec
 ) where
 
+import Data.Binary (decode, encode)
 import Data.Char (toUpper)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -67,3 +68,8 @@ setMultimapSpec = describe "SetMultimap" $ do
     SetMmap.member' 1 'a' m `shouldBe` True
     SetMmap.member' 1 'b' m `shouldBe` False
     SetMmap.notMember' 1 'b' m `shouldBe` True
+  it "can be serialized" $ do
+    let
+      m = fromList [(1, 'a'), (2, 'b')] :: SetMultimap Int Char
+      bs = encode m
+    decode bs `shouldBe` m

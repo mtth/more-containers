@@ -40,6 +40,7 @@ module Data.Multiset (
 import Prelude hiding (filter, foldr, map, max, min, null, replicate)
 import qualified Prelude as Prelude
 
+import Data.Binary (Binary(..))
 import Data.Foldable (foldl', foldr, toList)
 import Data.List (groupBy, sortOn)
 import Data.Map.Strict (Map)
@@ -69,6 +70,10 @@ instance Ord v => Monoid (Multiset v) where
 instance Foldable Multiset where
   foldr f r0 (Multiset m _) = Map.foldrWithKey go r0 m where
     go v n r1 = foldr f r1 $ replicate n v
+
+instance Binary v => Binary (Multiset v) where
+  put (Multiset m s) = put m <> put s
+  get = Multiset <$> get <*> get
 
 #if __GLASGOW_HASKELL__ >= 708
 instance Ord v => GHC.Exts.IsList (Multiset v) where

@@ -6,6 +6,7 @@ module Spec.Multiset (
 
 import Prelude hiding (max, min, null, replicate)
 
+import Data.Binary (decode, encode)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Test.Hspec (Spec, describe, it, shouldBe)
@@ -67,3 +68,8 @@ multisetSpec = describe "Multiset" $ do
     fromList "abb" `max` fromList "aab" `shouldBe` fromList "aabb"
     fromList "abb" `min` fromList "aab" `shouldBe` fromList "ab"
     fromList "abb" `difference` fromList "aab" `shouldBe` fromList "b"
+  it "can be serialized" $ do
+    let
+      ms = fromList "aabc"
+      bs = encode ms
+    decode bs `shouldBe` ms

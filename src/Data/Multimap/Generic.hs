@@ -30,6 +30,7 @@ import qualified Data.Multiset as Mset
 
 import Prelude hiding (filter, foldr, null)
 import qualified Prelude as Prelude
+import Data.Binary (Binary(..))
 import Data.Foldable (foldl', foldr)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -58,6 +59,10 @@ instance Foldable c => Foldable (Multimap c k) where
 
 instance Traversable c => Traversable (Multimap c k) where
   sequenceA (Multimap m) = Multimap <$> sequenceA (fmap sequenceA m)
+
+instance (Binary k, Binary (c v)) => Binary (Multimap c k v) where
+  put (Multimap m) = put m
+  get = Multimap <$> get
 
 #if __GLASGOW_HASKELL__ >= 708
 instance (Collection c, GHC.Exts.IsList (c v), GHC.Exts.Item (c v) ~ v, Ord k) => GHC.Exts.IsList (Multimap c k v) where
