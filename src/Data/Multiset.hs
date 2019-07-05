@@ -35,6 +35,7 @@ module Data.Multiset (
   toGroupList, toGrowingGroupList, toShrinkingGroupList,
   toCountMap,
   -- * Other
+  maxView, minView,
   mostCommon
 ) where
 
@@ -252,6 +253,29 @@ toShrinkingGroupList :: Multiset v -> [Group v]
 toShrinkingGroupList = sortOn (negate . snd) . toGroupList
 
 -- Other
+
+view :: Ord v => (Map v Int -> Maybe ((v, Int), Map v Int)) -> Multiset v -> Maybe (v, Multiset v)
+view mapView (Multiset m s) = case mapView m of
+  Nothing -> Nothing
+  Just ((v, n), m') ->
+    let
+      s' = s - 1
+      ms = if n == 1 then Multiset m' s' else Multiset (Map.insert v (n - 1) m') s'
+    in Just (v, ms)
+
+-- | /O(log m)/ Takes an element of maximum value from the multiset and the remaining multiset, or
+-- 'Nothing' if the multiset was already empty.
+--
+-- @since 0.2.1.2
+maxView :: Ord v => Multiset v -> Maybe (v, Multiset v)
+maxView = view Map.maxViewWithKey
+
+-- | /O(log m)/ Takes an element of minimum value from the multiset and the remaining multiset, or
+-- 'Nothing' if the multiset was already empty.
+--
+-- @since 0.2.1.2
+minView :: Ord v => Multiset v -> Maybe (v, Multiset v)
+minView = view Map.minViewWithKey
 
 -- | /O(m)/ Returns the multiset's elements grouped by count, most common first.
 mostCommon :: Multiset v -> [(Int, [v])]

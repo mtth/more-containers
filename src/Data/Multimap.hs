@@ -41,7 +41,8 @@ module Data.Multimap (
 #if __GLASGOW_HASKELL__ >= 708
   inverse,
 #endif
-  inverseWith
+  inverseWith,
+  maxViewWith, minViewWith
 ) where
 
 import Prelude ()

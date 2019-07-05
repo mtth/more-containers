@@ -73,3 +73,8 @@ multisetSpec = describe "Multiset" $ do
       ms = fromList "aabc"
       bs = encode ms
     decode bs `shouldBe` ms
+  it "supports min and max views" $ do
+    let ms = fromList "aabc"
+    maxView ms `shouldBe` Just ('c', fromList "aab")
+    minView ms `shouldBe` Just ('a', fromList "abc")
+    minView (empty :: Multiset Char) `shouldBe` Nothing

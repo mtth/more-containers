@@ -8,6 +8,7 @@ module Spec.Multimap (
 
 import Data.Binary (decode, encode)
 import Data.Char (toUpper)
+import qualified Data.List as List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
@@ -40,6 +41,11 @@ listMultimapSpec = describe "ListMultimap" $ do
       m1 = fromList [('a', 1), ('a', 1)] :: ListMultimap Char Int
       m2 = mapGroups (fmap Set.fromList) m1 :: SetMultimap Char Int
     m2 `shouldBe` fromList [('a', 1)]
+  it "supports min and max views" $ do
+    let m = fromGroupList [(1, "ab"), (2, "c")]
+    minViewWith List.uncons m `shouldBe` Just ((1, 'a'), fromGroupList [(1, "b"), (2, "c")])
+    maxViewWith List.uncons m `shouldBe` Just ((2, 'c'), fromGroupList [(1, "ab")])
+    maxViewWith List.uncons (empty :: ListMultimap Int Char) `shouldBe` Nothing
 
 seqMultimapSpec :: Spec
 seqMultimapSpec = describe "SeqMultimap" $ do

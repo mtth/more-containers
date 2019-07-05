@@ -21,6 +21,7 @@ module Data.Multimap.Generic (
   mapGroups,
   toList, toGroupList, toMap,
   keys, keysSet, keysMultiset,
+  maxViewWith, minViewWith,
   modifyMany, modifyManyF
 ) where
 
@@ -120,7 +121,7 @@ fromListWith :: Ord k => ([v] -> c v) -> [(k, v)] -> Multimap c k v
 fromListWith f ts = Multimap $ Map.map (f . reverse) $ m where
   Multimap m = foldl' (\r (k, v) -> modifyMany (v:) k r) empty ts
 
--- | /O(1)/ Transforms a map of collections into a multimap.
+-- | /O(m * C)/ Transforms a map of collections into a multimap.
 fromMap :: Collection c => Map k (c v) -> Multimap c k v
 fromMap = Multimap . Map.filter (not . Col.null)
 
@@ -234,6 +235,30 @@ toGroupList = Map.toList . _toMap
 -- | /O(1)/ Converts a multimap into a map of collections.
 toMap :: Multimap c k v -> Map k (c v)
 toMap = _toMap
+
+viewWith
+  :: (Collection c, Ord k)
+  => (Map k (c v) -> Maybe ((k, c v), Map k (c v)))
+  -> (c v -> Maybe (v, c v)) -> Multimap c k v -> Maybe ((k, v), Multimap c k v)
+viewWith mapView f (Multimap m) = case mapView m of
+  Nothing -> Nothing
+  Just ((k, c), m') -> case f c of
+    Nothing -> Nothing
+    Just (v, c') -> Just ((k, v), Multimap (if Col.null c' then m' else Map.insert k c' m'))
+
+-- | Returns the multimap's maximum key and value. The input function is guaranteed to be called
+-- with a non-empty collection.
+--
+-- @since 0.2.1.2
+maxViewWith :: (Collection c, Ord k) => (c v -> Maybe (v, c v)) -> Multimap c k v -> Maybe ((k, v), Multimap c k v)
+maxViewWith = viewWith Map.maxViewWithKey
+
+-- | Returns the multimap's minimum key and value. The input function is guaranteed to be called
+-- with a non-empty collection.
+--
+-- @since 0.2.1.2
+minViewWith :: (Collection c, Ord k) => (c v -> Maybe (v, c v)) -> Multimap c k v -> Maybe ((k, v), Multimap c k v)
+minViewWith = viewWith Map.minViewWithKey
 
 -- | /O(m)/ Returns a list of the multimap's keys. Each key will be repeated as many times as it is
 -- present in the multimap.
