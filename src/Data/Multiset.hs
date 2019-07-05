@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -41,6 +42,7 @@ import Prelude hiding (filter, foldr, map, max, min, null, replicate)
 import qualified Prelude as Prelude
 
 import Data.Binary (Binary(..))
+import Data.Data (Data, Typeable)
 import Data.Foldable (foldl', foldr, toList)
 import Data.List (groupBy, sortOn)
 import Data.Map.Strict (Map)
@@ -56,7 +58,10 @@ import qualified GHC.Exts
 data Multiset v = Multiset
   { _toMap :: !(Map v Int)
   , _size :: !Int
-  } deriving (Eq, Ord, Read, Show)
+  } deriving (
+    Eq, Ord, Read, Show,
+    {-| @since 0.2.1.1 -} Data, {-| @since 0.2.1.1 -} Typeable
+  )
 
 -- | A group of values of a given size.
 type Group v = (v, Int)
@@ -71,6 +76,7 @@ instance Foldable Multiset where
   foldr f r0 (Multiset m _) = Map.foldrWithKey go r0 m where
     go v n r1 = foldr f r1 $ replicate n v
 
+-- | @since 0.2.1.0
 instance Binary v => Binary (Multiset v) where
   put (Multiset m s) = put m <> put s
   get = Multiset <$> get <*> get
@@ -231,7 +237,7 @@ toSet :: Multiset v -> Set v
 toSet = Map.keysSet . _toMap
 
 -- | /O(m)/ Converts the multiset to a list of values and associated counts. The groups are in
--- undefined order; see 'toAscGroupList' and 'toDescGroupList' for sorted versions.
+-- undefined order; see 'toGrowingGroupList' and 'toShrinkingGroupList' for sorted versions.
 toGroupList :: Multiset v -> [Group v]
 toGroupList = Map.toList . _toMap
 

@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -31,6 +32,7 @@ import qualified Data.Multiset as Mset
 import Prelude hiding (filter, foldr, null)
 import qualified Prelude as Prelude
 import Data.Binary (Binary(..))
+import Data.Data (Data, Typeable)
 import Data.Foldable (foldl', foldr)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -43,7 +45,10 @@ import qualified GHC.Exts
 -- | A map where the same key can be present multiple times.
 newtype Multimap c k v = Multimap
   { _toMap :: Map k (c v)
-  } deriving (Eq, Functor, Ord, Read, Show)
+  } deriving (
+    Eq, Ord, Read, Show, Functor,
+    {-| @since 0.2.1.1 -} Data, {-| @since 0.2.1.1 -} Typeable
+  )
 
 -- | A group of values.
 type Group k cv = (k, cv)
@@ -60,6 +65,7 @@ instance Foldable c => Foldable (Multimap c k) where
 instance Traversable c => Traversable (Multimap c k) where
   sequenceA (Multimap m) = Multimap <$> sequenceA (fmap sequenceA m)
 
+-- | @since 0.2.1.0
 instance (Binary k, Binary (c v)) => Binary (Multimap c k v) where
   put (Multimap m) = put m
   get = Multimap <$> get
@@ -143,7 +149,7 @@ notMember k = Map.notMember k . _toMap
 -- | Modifies a key's collection using an arbitrary function. More specifically, this function lifts
 -- an operation over a collection of values into a multimap operation.
 --
--- Sample use to filter even values from a 'SetMultimap':
+-- Sample use to filter even values from a 'Data.Multimap.SetMultimap':
 --
 -- @
 --    let ms = fromList [(\'a\', 1), (\'a\', 2)] :: SetMultimap Char Int
