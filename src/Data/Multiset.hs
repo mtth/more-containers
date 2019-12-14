@@ -191,6 +191,8 @@ map f (Multiset m s) = Multiset (Map.mapKeysWith (+) f m) s
 
 -- | Maps on the multiset's counts. Groups with resulting non-positive counts will be removed from
 -- the final multiset.
+--
+-- @since 0.2.2.0
 mapCounts :: Ord v => (Int -> Int) -> Multiset v -> Multiset v
 mapCounts f = mapGroups (\(v, n) -> (v, f n))
 
@@ -262,10 +264,14 @@ toShrinkingGroupList = sortOn (negate . snd) . toGroupList
 
 -- | /O(n)/ Returns the multiset's elements as a list where each element is repeated as many times
 -- as its number of occurrences. This is a synonym for 'toList'.
+--
+-- @since 0.2.2.0
 elems :: Multiset v -> [v]
 elems = toList
 
 -- | /O(m)/ Returns a list of the distinct elements in the multiset.
+--
+-- @since 0.2.2.0
 distinctElems :: Multiset v -> [v]
 distinctElems = Map.keys . _toMap
 
