@@ -26,7 +26,7 @@ module Data.Multiset (
   -- * Update
   insert, remove, removeAll, modify,
   -- * Maps and filters
-  map, mapGroups,
+  map, mapCounts, mapGroups,
   filter, filterGroups,
   -- * Combination
   max, min, difference, unionWith, intersectionWith,
@@ -35,6 +35,7 @@ module Data.Multiset (
   toGroupList, toGrowingGroupList, toShrinkingGroupList,
   toCountMap,
   -- * Other
+  elems, distinctElems,
   maxView, minView,
   mostCommon
 ) where
@@ -75,7 +76,7 @@ instance Ord v => Monoid (Multiset v) where
 
 instance Foldable Multiset where
   foldr f r0 (Multiset m _) = Map.foldrWithKey go r0 m where
-    go v n r1 = foldr f r1 $ replicate n v
+    go v n r1 = foldl' (flip f) r1 $ Prelude.replicate n v
 
 -- | @since 0.2.1.0
 instance Binary v => Binary (Multiset v) where
@@ -86,7 +87,7 @@ instance Binary v => Binary (Multiset v) where
 instance Ord v => GHC.Exts.IsList (Multiset v) where
   type Item (Multiset v) = v
   fromList = fromList
-  toList   = toList
+  toList = toList
 #endif
 
 -- | /O(1)/ Checks whether a multiset is empty.
@@ -188,6 +189,11 @@ filterGroups f (Multiset m _) = Map.foldlWithKey' go empty m where
 map :: (Ord v1, Ord v2) => (v1 -> v2) -> Multiset v1 -> Multiset v2
 map f (Multiset m s) = Multiset (Map.mapKeysWith (+) f m) s
 
+-- | Maps on the multiset's counts. Groups with resulting non-positive counts will be removed from
+-- the final multiset.
+mapCounts :: Ord v => (Int -> Int) -> Multiset v -> Multiset v
+mapCounts f = mapGroups (\(v, n) -> (v, f n))
+
 -- | Maps on the multiset's groups. Groups with resulting non-positive counts will be removed from
 -- the final multiset.
 mapGroups :: Ord v => (Group v -> Group v) -> Multiset v -> Multiset v
@@ -253,6 +259,15 @@ toShrinkingGroupList :: Multiset v -> [Group v]
 toShrinkingGroupList = sortOn (negate . snd) . toGroupList
 
 -- Other
+
+-- | /O(n)/ Returns the multiset's elements as a list where each element is repeated as many times
+-- as its number of occurrences. This is a synonym for 'toList'.
+elems :: Multiset v -> [v]
+elems = toList
+
+-- | /O(m)/ Returns a list of the distinct elements in the multiset.
+distinctElems :: Multiset v -> [v]
+distinctElems = Map.keys . _toMap
 
 view :: Ord v => (Map v Int -> Maybe ((v, Int), Map v Int)) -> Multiset v -> Maybe (v, Multiset v)
 view mapView (Multiset m s) = case mapView m of

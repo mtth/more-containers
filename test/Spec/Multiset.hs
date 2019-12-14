@@ -7,6 +7,7 @@ module Spec.Multiset (
 import Prelude hiding (max, min, null, replicate)
 
 import Data.Binary (decode, encode)
+import Data.Foldable (foldl')
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Test.Hspec (Spec, describe, it, shouldBe)
@@ -59,15 +60,25 @@ multisetSpec = describe "Multiset" $ do
     remove 'a' (singleton 'b') `shouldBe` singleton 'b'
     removeAll 'a' (singleton 'b') `shouldBe` singleton 'b'
     removeAll 'a' (replicate 3 'a') `shouldBe` empty
+  it "can be folded" $ do
+    foldl' (+) 0 (singleton 3) `shouldBe` 3
+    foldl' (+) 0 (fromList [1, 2, 4]) `shouldBe` 7
   it "can be modified" $ do
     modify (*3) 'a' empty `shouldBe` empty
     modify (*2) 'a' (singleton 'a') `shouldBe` replicate 2 'a'
     modify (*4) 'a' (singleton 'b') `shouldBe` singleton 'b'
+  it "can be count mapped" $ do
+    mapCounts (*3) empty `shouldBe` (empty :: Multiset Char)
+    mapCounts (*2) (singleton 'a') `shouldBe` replicate 2 'a'
+    mapCounts (*0) (singleton 'a') `shouldBe` empty
   it "can be combined" $ do
     fromList "abb" <> fromList "aabc" `shouldBe` fromList "aaabbbc"
     fromList "abb" `max` fromList "aab" `shouldBe` fromList "aabb"
     fromList "abb" `min` fromList "aab" `shouldBe` fromList "ab"
     fromList "abb" `difference` fromList "aab" `shouldBe` fromList "b"
+  it "returns elements" $ do
+    elems (fromList "") `shouldBe` ""
+    elems (fromList "aaa") `shouldBe` "aaa"
   it "can be serialized" $ do
     let
       ms = fromList "aabc"
