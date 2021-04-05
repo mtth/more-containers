@@ -1,7 +1,7 @@
 cabal-version:  2.0
 
 name:           more-containers
-version:        0.2.2.1
+version:        0.2.2.2
 synopsis:       A few more collections
 description:    https://github.com/mtth/more-containers
 category:       Data Structures
@@ -31,6 +31,8 @@ library
   other-modules:
       Data.Multimap.Generic
     , Paths_more_containers
+  autogen-modules:
+      Paths_more_containers
   hs-source-dirs:
       src
   build-depends:
