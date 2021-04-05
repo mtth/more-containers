@@ -49,7 +49,9 @@ import Data.Foldable (foldl', foldr, toList)
 import Data.List (groupBy, sortOn)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+#if !MIN_VERSION_base(4, 11, 0)
 import Data.Semigroup (Semigroup, (<>))
+#endif
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified GHC.Exts

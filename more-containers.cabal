@@ -1,5 +1,7 @@
+cabal-version:  2.0
+
 name:           more-containers
-version:        0.2.2.0
+version:        0.2.2.1
 synopsis:       A few more collections
 description:    https://github.com/mtth/more-containers
 category:       Data Structures
@@ -11,7 +13,6 @@ copyright:      2017-2019 Matthieu Monsch
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
-cabal-version:  >=1.10
 extra-source-files:
     README.md
 

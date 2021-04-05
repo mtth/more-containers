@@ -9,7 +9,6 @@ module Data.Multimap.Set (
 import Prelude hiding (map)
 
 import qualified Data.Map as Map
-import Data.Maybe (maybe)
 import Data.Set (Set)
 import qualified Data.Set as Set
 

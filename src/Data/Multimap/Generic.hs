@@ -30,15 +30,17 @@ import qualified Data.Multimap.Collection as Col
 import Data.Multiset (Multiset)
 import qualified Data.Multiset as Mset
 
-import Prelude hiding (filter, foldr, null)
+import Prelude hiding (filter, null)
 import qualified Prelude as Prelude
 import Data.Binary (Binary(..))
 import Data.Data (Data, Typeable)
-import Data.Foldable (foldl', foldr)
+import Data.Foldable (foldl')
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
+#if !MIN_VERSION_base(4, 11, 0)
 import Data.Semigroup (Semigroup, (<>))
+#endif
 import Data.Set (Set)
 import Data.Tuple (swap)
 import qualified GHC.Exts

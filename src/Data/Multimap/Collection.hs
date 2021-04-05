@@ -9,7 +9,7 @@ module Data.Multimap.Collection (
 import Prelude hiding (filter)
 import qualified Prelude as Prelude
 
-import Data.Foldable (foldl', foldr)
+import Data.Foldable (foldl')
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
 import Data.Set (Set)
