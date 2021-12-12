@@ -11,6 +11,7 @@ import Data.Char (toUpper)
 import qualified Data.List as List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.Semigroup (Sum(Sum))
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Test.Hspec (Spec, describe, it, shouldBe)
@@ -46,6 +47,11 @@ listMultimapSpec = describe "ListMultimap" $ do
     minViewWith List.uncons m `shouldBe` Just ((1, 'a'), fromGroupList [(1, "b"), (2, "c")])
     maxViewWith List.uncons m `shouldBe` Just ((2, 'c'), fromGroupList [(1, "ab")])
     maxViewWith List.uncons (empty :: ListMultimap Int Char) `shouldBe` Nothing
+  it "is a monad" $
+    (do a <- fromGroupList [(Sum 1, "abc"), (Sum 2, "")]
+        fromGroupList [(Sum 3, [toUpper a, a]), (Sum 5, a : "def")])
+    `shouldBe`
+    fromGroupList [(Sum 4, "AaBbCc"), (Sum 6, "adefbdefcdef")]
 
 seqMultimapSpec :: Spec
 seqMultimapSpec = describe "SeqMultimap" $ do
