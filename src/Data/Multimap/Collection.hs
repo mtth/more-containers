@@ -6,10 +6,11 @@ module Data.Multimap.Collection (
   Collection(..)
 ) where
 
-import Prelude hiding (filter)
+import Prelude hiding (filter, null)
 import qualified Prelude as Prelude
 
 import Data.Foldable (foldl')
+import Data.Monoid (Alt(Alt, getAlt))
 import Data.Sequence (Seq)
 import qualified Data.Sequence as Seq
 import Data.Set (Set)
@@ -49,3 +50,9 @@ instance Collection Set where
   filter = Set.filter
   size = Set.size
   null = Set.null
+
+instance Collection c => Collection (Alt c) where
+  singleton = Alt . singleton
+  filter f = Alt . filter f . getAlt
+  size = size . getAlt
+  null = null . getAlt

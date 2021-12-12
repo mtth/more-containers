@@ -18,13 +18,16 @@ module Data.Multimap.Generic (
   deleteMany,
   inverseWith,
   filter, filterGroups,
-  mapGroups,
+  mapGroups, mapGroupKeysWith,
   toList, toGroupList, toMap,
   keys, keysSet, keysMultiset,
   maxViewWith, minViewWith,
   modifyMany, modifyManyF
 ) where
 
+import Control.Applicative (Alternative((<|>)))
+import qualified Control.Applicative
+import Control.Monad (ap)
 import Data.Multimap.Collection (Collection)
 import qualified Data.Multimap.Collection as Col
 import Data.Multiset (Multiset)
@@ -33,11 +36,13 @@ import qualified Data.Multiset as Mset
 import Prelude hiding (filter, null)
 import qualified Prelude as Prelude
 import Data.Binary (Binary(..))
+import Data.Coerce (coerce)
 import Data.Data (Data, Typeable)
 import Data.Foldable (foldl')
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (fromMaybe)
+import Data.Monoid (Alt(Alt))
 #if !MIN_VERSION_base(4, 11, 0)
 import Data.Semigroup (Semigroup, (<>))
 #endif
@@ -67,6 +72,25 @@ instance Foldable c => Foldable (Multimap c k) where
 
 instance Traversable c => Traversable (Multimap c k) where
   sequenceA (Multimap m) = Multimap <$> sequenceA (fmap sequenceA m)
+
+instance (Monoid k, Ord k, Collection c, Foldable c, Alternative c) => Applicative (Multimap c k) where
+  pure = singleton mempty
+  (<*>) = ap
+
+instance (Monoid k, Ord k, Collection c, Foldable c, Alternative c) => Alternative (Multimap c k) where
+  empty = unalt mempty
+  m1 <|> m2 = unalt (alt m1 <> alt m2)
+
+instance (Monoid k, Ord k, Collection c, Foldable c, Alternative c) => Monad (Multimap c k) where
+  return = pure
+  Multimap m >>= f = unalt $ joinMultimap (foldMap (alt . f) <$> m)
+    where joinMultimap = Map.foldMapWithKey (mapGroupKeysWith (<>) . (<>))
+
+alt :: Multimap c k a -> Multimap (Alt c) k a
+alt = coerce
+
+unalt :: Multimap (Alt c) k a -> Multimap c k a
+unalt = coerce
 
 -- | @since 0.2.1.0
 instance (Binary k, Binary (c v)) => Binary (Multimap c k v) where
@@ -223,6 +247,15 @@ mapGroups
   :: (Collection c2, Monoid (c2 v2), Ord k2)
   => (Group k1 (c1 v1) -> Group k2 (c2 v2)) -> Multimap c1 k1 v1 -> Multimap c2 k2 v2
 mapGroups f = fromGroupList . fmap f . toGroupList
+
+-- | @mapGroupKeysWith c f s@ is the multimap obtained by applying @f@ to each key of @s@.
+--
+-- The size of the result may be smaller if @f@ two or more distinct keys to the same new key. In this case the
+-- associated values will be combined using @c@. The value at the greater of the two original keys is used as the first
+-- argument to @c@.
+mapGroupKeysWith :: (Collection c, Ord k2)
+                 => (c a -> c a -> c a) -> (k1 -> k2) -> Multimap c k1 a -> Multimap c k2 a
+mapGroupKeysWith c f = fromMap . Map.mapKeysWith c f . toMap 
 
 -- | /O(n)/ Converts a multimap into its list of entries. Note that this is different from
 -- 'Data.Foldable.toList' which returns the multimap's values (similar to "Data.Map").
